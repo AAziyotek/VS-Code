@@ -1,0 +1,14 @@
+---
+  - name: Install packages 
+    hosts: 8lbpb
+    remote_user: ansible
+    become: true
+    
+    tasks: 
+      - name: install haproxy
+        state: latest 
+        
+      - name: Send conf dile from temp
+        template:
+          src:     
+

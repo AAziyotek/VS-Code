@@ -1,0 +1,53 @@
+---
+- hosts: loadbalancer
+  remote_user: ansible
+  become: yes  
+  
+  tasks:
+    - name: test connection
+      ping:
+    
+    - name: Install latest haproxy
+      yum: 
+        name: haproxy
+        state: latest
+
+    - name: run haproxy
+      service:
+        name: haproxy
+        state: started
+
+    - name: firewalld enabled and running
+      service:
+        name: firewalld
+        enabled: true
+        state: started
+
+    - name: firewalld permits http service
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: write haproxy config file
+      template: 
+        src: /ansible/loadbalancerplaybook/loadbalancerplaybook1/haproxy.j2
+        dest: /etc/haproxy/haproxy.cfg
+      notify: 
+      - restart haproxy
+
+  handlers:
+    - name: restart haproxy
+      service: 
+        name: haproxy
+        state: restarted
+    - name: start haproxy 
+      service:
+        name: haproxy
+        state: started
+    - name: enable haproxy
+      service:
+        name: haproxy
+        enabled: yes
+

@@ -1,0 +1,110 @@
+---
+- hosts: webservers
+  vars:
+  remote_user: ansible  
+  become: yes
+  tasks:
+    - name: ensure apache is at the latest version and firewalld installed
+      yum:
+        name: 
+          - httpd
+          - firewalld
+        state: latest
+
+    - name: firewalld enabled and running
+      service:
+        name: firewalld
+        enabled: true
+        state: started
+ 
+    - name: firewalld permits http service
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: make sure net-tools installed
+      yum:
+        name: net-tools
+        state: latest
+    
+    - name: httpd enabled and running
+      service:
+        name: httpd
+        enabled: true
+        state: started
+
+    - name: "Copy template files"
+      template: 
+        src: "index.html.j2"
+        dest: "/var/www/html/index.html"
+
+#    - name: Add webserver1 on content line      
+#      hosts: webserver1
+#      template: 
+#        src: /var/www/html/2index.html.j2
+#        dest: /var/www/html/2index.html
+
+#    - name: Add webserver2 on content line
+#      hosts: webserver2
+#      template: 
+#        src: /var/www/html/3index.html.j2
+#        dest: /var/www/html/index.html
+           
+#    - name: Create index.html
+#      ansible.builtin.file:
+#        path: /var/www/html/index.html
+#        state: file
+#
+#    - name: Copy using online content 
+#      ansible.builtin.copy:
+#        content: "Hello!\n"
+#        dest: /var/www/html/index.html
+#
+#    - name: test html page is installed
+#      copy:
+#        content: "<!DOCTYPE html>
+#<html>
+#<head>
+#<title>Page Title</title>
+#</head>
+#<body>
+
+#<h1>This is a Heading</h1>
+#<p>This is a paragraph.</p>
+
+#</body>
+#</html>"
+#        dest: /var/www/html/index.html
+
+- name: test in internet server is running
+  hosts: localhost
+  become: no
+
+  tasks: 
+    - name: connect to internet web server
+      uri: 
+        url: http://192.168.38.19
+        status_code: 200
+    - name: connect to internet web server 
+      uri:
+        url: http://192.168.38.20
+        status_code: 200
+    - name: connect to internet web server 
+      uri:
+        url: http://192.168.38.21
+        status_code: 200
+
+  handlers:
+    - name: restart apache
+      service: 
+        name: httpd
+        state: restarted
+  
+    - name: write the apache config file
+      template:
+        src: /ansible/webserverplaybook/httpd.j2
+        dest: /etc/httpd/conf/httpd.conf
+        backup: yes
+      notify:

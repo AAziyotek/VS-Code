@@ -1,0 +1,21 @@
+---  
+  - name: Install packages
+    hosts: 8lbpb
+    remote_user: ansible
+    become: true
+
+    tasks:
+
+      - name: install haproxy
+        state: latest
+
+      - name: Send conf dile from temp
+        template:
+          src: 8haproxy.j2
+          dest: /ansible/loadbalancerplaybook/loadbalancerplaybook1/haproxy.j2
+
+      - name: add a line if its not exist
+        lineinfile: 
+          path: /ansible/loadbalancerplaybook/loadbalancerplaybook1/haproxy.j2
+          regexp: " server prdx-webserver136 192.168.38.19 check          #web001 "
+          line: " server prdx-webserver137 192.168.38.35 check          #web001 "

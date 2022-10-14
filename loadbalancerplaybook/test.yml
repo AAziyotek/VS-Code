@@ -1,0 +1,35 @@
+--- 
+  - hosts: loadbalancer
+    roles: 
+            - loadbalancerplaybook1
+  - hosts: webservers
+    roles: 
+            - /ansible/webserverplaybook
+
+  - hosts: webserver1
+    become: yes
+    roles:
+           - /ansible/webserverplaybook
+    tasks:
+      - name: Add web001 after contact line in index.html
+        template:
+          src: /ansible/webserverplaybook/2index.html.j2
+          dest: /var/www/html/index.html
+   
+  - hosts: webserver2
+    become: yes
+    roles: 
+          - /ansible/webserverplaybook
+    tasks:
+      - name: Add web003 
+        template:
+          src: /ansible/webserverplaybook/3index.html.j2
+          dest: /var/www/html/index.html
+
+#
+#- name: add webserver1
+#    hosts: webserver1
+#    template:
+#      src: /var/www/html/2index.html.j2
+#      dest: /var/www/html/2index.html
+
